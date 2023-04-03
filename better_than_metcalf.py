@@ -1,6 +1,8 @@
+from types import MappingProxyType
 import ipdb
 
 class Scale:
+
 
     A = 'a'
     B = 'b'
@@ -16,35 +18,49 @@ class Scale:
     D_FLAT = 'd_flat'
     G_FLAT = 'g_flat'
 
-    WHICH = MappingProxyType({
-        C: (SHARPS, 0)
-        G: (SHARPS, 1)
-        D: (SHARPS, 2)
-        A: (SHARPS, 3)
-        E: (SHARPS, 4)
-        B: (SHARPS, 5)
-        F: (FLATS, 1)
-        B_FLAT: (FLATS, 2)
-        E_FLAT: (FLATS, 3)
-        A_FLAT: (FLATS, 4)
-        D_FLAT: (FLATS, 5)
-        G_FLAT: (FLATS, 6)
-        })
-
     FLATS = (B, E, A, D, G, C, F)
     SHARPS = tuple(reversed(FLATS))
+
+    WHICH = MappingProxyType({
+        C: (SHARPS, 0),
+        G: (SHARPS, 1),
+        D: (SHARPS, 2),
+        A: (SHARPS, 3),
+        E: (SHARPS, 4),
+        B: (SHARPS, 5),
+        F: (FLATS, 1),
+        B_FLAT: (FLATS, 2),
+        E_FLAT: (FLATS, 3),
+        A_FLAT: (FLATS, 4),
+        D_FLAT: (FLATS, 5),
+        G_FLAT: (FLATS, 6),
+        })
+
 
     __slots__ = ('root',)
 
     def __init__(self, root):
         self.root = root
 
-    def notes(self):
+    def _notes_raw(self):
         flats = list(sorted(self.FLATS))
         index = flats.index(self.root)
         first = flats[index:]
         last = flats[:index]
         return first + last
+
+    def notes(self):
+        raw = self._notes_raw()
+        flats_or_sharps, num_accidentals = self.WHICH[self.root]
+        accidentals = flats_or_sharps[:num_accidentals]
+        output = []
+        for note in raw:
+            if note in accidentals:
+                output.append(f'{note} + acc')
+            else:
+                output.append(note)
+        return output
+
 
 
 if __name__ == '__main__':
