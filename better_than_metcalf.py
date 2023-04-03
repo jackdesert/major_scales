@@ -1,4 +1,6 @@
 from types import MappingProxyType
+import random
+from datetime import datetime
 import ipdb
 
 class Scale:
@@ -20,6 +22,7 @@ class Scale:
 
     FLATS = (B, E, A, D, G, C, F)
     SHARPS = tuple(reversed(FLATS))
+    KEYS = tuple([A, B, C, D, E, F, G, B_FLAT, E_FLAT, A_FLAT, D_FLAT, G_FLAT])
 
     WHICH = MappingProxyType({
         C: (SHARPS, 0),
@@ -44,7 +47,7 @@ class Scale:
 
     def _notes_raw(self):
         flats = list(sorted(self.FLATS))
-        index = flats.index(self.root)
+        index = flats.index(self.root[:1])
         first = flats[index:]
         last = flats[:index]
         return first + last
@@ -53,17 +56,16 @@ class Scale:
         raw = self._notes_raw()
         flats_or_sharps, num_accidentals = self.WHICH[self.root]
         accidentals = flats_or_sharps[:num_accidentals]
+        accidental = '#' if flats_or_sharps == self.SHARPS else 'b'
         output = []
         for note in raw:
             if note in accidentals:
-                output.append(f'{note} + acc')
+                output.append(f'{note}{accidental}'.upper())
             else:
-                output.append(note)
+                output.append(note.upper())
         return output
 
-
-
-if __name__ == '__main__':
+def list_all():
     print(Scale('a').notes())
     print(Scale('b').notes())
     print(Scale('c').notes())
@@ -71,3 +73,24 @@ if __name__ == '__main__':
     print(Scale('e').notes())
     print(Scale('f').notes())
     print(Scale('g').notes())
+
+
+class Asker:
+    @staticmethod
+    def ask_all():
+        start = datetime.now()
+        keys = list(Scale.KEYS)
+        random.shuffle(keys)
+        for key in keys:
+            while True:
+                answer = input(f'Which notes are in the key of {key.upper()}? ')
+                if answer.upper().strip().split(',') == Scale(key).notes():
+                    break
+                else:
+                    print('Try again :heart:')
+        elapsed = (datetime.now() - start).total_seconds()
+        print(f'You Completed all 12 scales in only {round(elapsed)} seconds')
+        print('You WIN. You are WAY WAY WAY faster than Metcalf')
+
+if __name__ == '__main__':
+    Asker.ask_all()
