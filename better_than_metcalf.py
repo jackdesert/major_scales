@@ -76,21 +76,37 @@ def list_all():
 
 
 class Asker:
-    @staticmethod
-    def ask_all():
+    @classmethod
+    def ask_all(cls):
         start = datetime.now()
         keys = list(Scale.KEYS)
         random.shuffle(keys)
         for key in keys:
             while True:
                 answer = input(f'Which notes are in the key of {key.upper()}? ')
-                if answer.upper().strip().split(',') == Scale(key).notes():
+                answer_list = answer.upper().strip().split(',')
+                answer_list_cleaned = []
+                for note in answer_list:
+                    answer_list_cleaned.append(cls.format(note))
+                if answer_list_cleaned == Scale(key).notes():
                     break
                 else:
                     print('Try again :heart:')
         elapsed = (datetime.now() - start).total_seconds()
         print(f'You Completed all 12 scales in only {round(elapsed)} seconds')
         print('You WIN. You are WAY WAY WAY faster than Metcalf')
+
+    @staticmethod
+    def format(note):
+        """
+        Allow alternate spellings:
+
+        CS -> C#
+        BF -> BB
+        """
+        if (len(note) == 2) and note.endswith('S'):
+            return f'{note[0]}#'
+        return note
 
 if __name__ == '__main__':
     Asker.ask_all()
