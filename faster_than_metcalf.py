@@ -1,10 +1,10 @@
-from types import MappingProxyType
 import random
+import re
 from datetime import datetime
-import ipdb
+from types import MappingProxyType
+
 
 class Scale:
-
 
     A = 'a'
     B = 'b'
@@ -23,23 +23,25 @@ class Scale:
     FLATS = (B, E, A, D, G, C, F)
     SHARPS = tuple(reversed(FLATS))
     KEYS = tuple([A, B, C, D, E, F, G, B_FLAT, E_FLAT, A_FLAT, D_FLAT, G_FLAT])
+    EASY_KEYS = tuple([C, D, F, G, B_FLAT])
     HARD_KEYS = tuple([B, E, E_FLAT, A_FLAT, D_FLAT, G_FLAT])
 
-    WHICH = MappingProxyType({
-        C: (SHARPS, 0),
-        G: (SHARPS, 1),
-        D: (SHARPS, 2),
-        A: (SHARPS, 3),
-        E: (SHARPS, 4),
-        B: (SHARPS, 5),
-        F: (FLATS, 1),
-        B_FLAT: (FLATS, 2),
-        E_FLAT: (FLATS, 3),
-        A_FLAT: (FLATS, 4),
-        D_FLAT: (FLATS, 5),
-        G_FLAT: (FLATS, 6),
-        })
-
+    WHICH = MappingProxyType(
+        {
+            C: (SHARPS, 0),
+            G: (SHARPS, 1),
+            D: (SHARPS, 2),
+            A: (SHARPS, 3),
+            E: (SHARPS, 4),
+            B: (SHARPS, 5),
+            F: (FLATS, 1),
+            B_FLAT: (FLATS, 2),
+            E_FLAT: (FLATS, 3),
+            A_FLAT: (FLATS, 4),
+            D_FLAT: (FLATS, 5),
+            G_FLAT: (FLATS, 6),
+        }
+    )
 
     __slots__ = ('root',)
 
@@ -66,6 +68,7 @@ class Scale:
                 output.append(note.upper())
         return output
 
+
 def list_all():
     print(Scale('a').notes())
     print(Scale('b').notes())
@@ -77,16 +80,23 @@ def list_all():
 
 
 class Asker:
+    # Allow splitter to be space or comma or whatever is convenient
+    SPLITTER = re.compile(r'[^a-zA-Z]')
+
     @classmethod
     def ask_all(cls):
         start = datetime.now()
-        keys = list(Scale.HARD_KEYS)
+        keys = list(Scale.EASY_KEYS)
         for _ in range(100):
             random.shuffle(keys)
         for key in keys:
             while True:
-                answer = input(f'Which notes are in the key of {key.upper()}? ')
-                answer_list = answer.upper().strip().split(',')
+                answer = (
+                    input(f'Which notes are in the key of {key.upper()}? ')
+                    .upper()
+                    .strip()
+                )
+                answer_list = cls.SPLITTER.split(answer)
                 answer_list_cleaned = []
                 for note in answer_list:
                     answer_list_cleaned.append(cls.format(note))
@@ -96,7 +106,7 @@ class Asker:
                 else:
                     print('Try again :heart:')
         elapsed = (datetime.now() - start).total_seconds()
-        print(f'You Completed all 12 scales in only {round(elapsed)} seconds')
+        print(f'You Completed {len(keys)} scales in only {round(elapsed)} seconds')
         print('You WIN. You are WAY WAY WAY faster than Metcalf')
 
     @staticmethod
@@ -112,6 +122,7 @@ class Asker:
         if (len(note) == 2) and note.endswith('F'):
             return f'{note[0]}B'
         return note
+
 
 if __name__ == '__main__':
     Asker.ask_all()
