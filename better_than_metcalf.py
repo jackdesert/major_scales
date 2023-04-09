@@ -23,6 +23,7 @@ class Scale:
     FLATS = (B, E, A, D, G, C, F)
     SHARPS = tuple(reversed(FLATS))
     KEYS = tuple([A, B, C, D, E, F, G, B_FLAT, E_FLAT, A_FLAT, D_FLAT, G_FLAT])
+    HARD_KEYS = tuple([B, E, E_FLAT, A_FLAT, D_FLAT, G_FLAT])
 
     WHICH = MappingProxyType({
         C: (SHARPS, 0),
@@ -79,8 +80,9 @@ class Asker:
     @classmethod
     def ask_all(cls):
         start = datetime.now()
-        keys = list(Scale.KEYS)
-        random.shuffle(keys)
+        keys = list(Scale.HARD_KEYS)
+        for _ in range(100):
+            random.shuffle(keys)
         for key in keys:
             while True:
                 answer = input(f'Which notes are in the key of {key.upper()}? ')
@@ -88,7 +90,8 @@ class Asker:
                 answer_list_cleaned = []
                 for note in answer_list:
                     answer_list_cleaned.append(cls.format(note))
-                if answer_list_cleaned == Scale(key).notes():
+                # Note only looking for first seven
+                if answer_list_cleaned[:7] == Scale(key).notes():
                     break
                 else:
                     print('Try again :heart:')
@@ -106,6 +109,8 @@ class Asker:
         """
         if (len(note) == 2) and note.endswith('S'):
             return f'{note[0]}#'
+        if (len(note) == 2) and note.endswith('F'):
+            return f'{note[0]}B'
         return note
 
 if __name__ == '__main__':
